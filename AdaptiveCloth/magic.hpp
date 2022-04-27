@@ -40,7 +40,7 @@ struct Magic
 	bool enable_remeshing;
 
 	Magic() :
-		enable_remeshing(true),
+		enable_remeshing(false),
 		fixed_high_res_mesh(false),
 		handle_stiffness(1e3),
 		collision_stiffness(1e9),

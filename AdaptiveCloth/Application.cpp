@@ -25,7 +25,9 @@ Application::Application() : m_IsRunning(false)
 
 void init_physics(const std::string &json_file)
 {
+	// std::cout << "begin to load json\n";
 	load_json(json_file, g_App.m_Sim);
+	// std::cout << "end to load json\n";
 
 	g_App.m_Sim.Prepare();
 	

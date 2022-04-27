@@ -22,11 +22,14 @@ int main(int argc, char *argv[])
 	//	g_App.RunSimulate("Configurations\\dress-blue.json");
 	// g_App.RunSimulate("Configurations\\dress-yellow.json");
 	// g_App.RunSimulate("Configurations\\xudong_drap.json");
+
+    // 1. initialize
 	bool disable_imgui = false;
 	std::string conf = "";
 	ParseArg(argc, argv, conf, disable_imgui);
-	
 
+    // 2. run simulation
+	g_App.RunSimulate(conf);
 }
 
 void ParseArg(int argc, char *argv[], std::string &config_path,

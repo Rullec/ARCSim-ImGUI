@@ -33,21 +33,24 @@
 
 using namespace std;
 
-void parse(bool&, const Json::Value&);
-void parse(int&, const Json::Value&);
-void parse(double&, const Json::Value&);
-void parse(std::string&, const Json::Value&);
+void parse(bool &, const Json::Value &);
+void parse(int &, const Json::Value &);
+void parse(double &, const Json::Value &);
+void parse(std::string &, const Json::Value &);
 void complain(const Json::Value &json, const std::string &expected);
 
-template <int n> void parse(Vec<n> &v, const Json::Value &json)
+template <int n>
+void parse(Vec<n> &v, const Json::Value &json)
 {
-	if (!json.isArray()) complain(json, "array");
+	if (!json.isArray())
+		complain(json, "array");
 	assert(json.size() == n);
 	for (int i = 0; i < n; i++)
 		parse(v[i], json[i]);
 }
 
-template <typename T> void parse(T &x, const Json::Value &json, const T &x0)
+template <typename T>
+void parse(T &x, const Json::Value &json, const T &x0)
 {
 	if (json.isNull())
 		x = x0;
@@ -55,23 +58,25 @@ template <typename T> void parse(T &x, const Json::Value &json, const T &x0)
 		parse(x, json);
 }
 
-template <typename T> void parse(vector<T> &v, const Json::Value &json)
+template <typename T>
+void parse(vector<T> &v, const Json::Value &json)
 {
-	if (!json.isArray()) complain(json, "array");
+	if (!json.isArray())
+		complain(json, "array");
 	v.resize(json.size());
 	for (int i = 0; i < json.size(); i++)
 		parse(v[i], json[i]);
 }
 
-void parse(Cloth&, const Json::Value&);
-void parse_motions(vector<Motion>&, const Json::Value&);
-void parse_handles(vector<Handle*>&, const Json::Value&,
-				   const vector<Cloth>&, const vector<Motion>&);
-void parse_obstacles(vector<Obstacle>&, const Json::Value&,
-					 const vector<Motion>&);
-void parse_morphs(vector<Morph>&, const Json::Value&, const vector<Cloth> &);
-void parse(Wind&, const Json::Value&);
-void parse(Magic&, const Json::Value&);
+void parse(Cloth &, const Json::Value &);
+void parse_motions(vector<Motion> &, const Json::Value &);
+void parse_handles(vector<Handle *> &, const Json::Value &,
+				   const vector<Cloth> &, const vector<Motion> &);
+void parse_obstacles(vector<Obstacle> &, const Json::Value &,
+					 const vector<Motion> &);
+void parse_morphs(vector<Morph> &, const Json::Value &, const vector<Cloth> &);
+void parse(Wind &, const Json::Value &);
+void parse(Magic &, const Json::Value &);
 
 void load_json(const std::string &configFilename, Simulation &sim)
 {
@@ -99,7 +104,7 @@ void load_json(const std::string &configFilename, Simulation &sim)
 	{
 		parse(sim.step_time, json["timestep"]);
 		parse(sim.frame_steps, json["save_frames"], 1);
-		sim.frame_time = sim.step_time*sim.frame_steps;
+		sim.frame_time = sim.step_time * sim.frame_steps;
 		parse(sim.end_time, json["duration"], infinity);
 		sim.end_frame = infinity;
 	}
@@ -113,9 +118,9 @@ void load_json(const std::string &configFilename, Simulation &sim)
 	parse(sim.wind, json["wind"]);
 	parse(sim.friction, json["friction"], 0.6);
 	parse(sim.obs_friction, json["obs_friction"], 0.3);
-	std::string module_names[] = { "proximity", "physics", "strainlimiting",
-							 "collision", "remeshing", "separation",
-							 "popfilter", "plasticity" };
+	std::string module_names[] = {"proximity", "physics", "strainlimiting",
+								  "collision", "remeshing", "separation",
+								  "popfilter", "plasticity"};
 	for (int i = 0; i < Simulation::nModules; i++)
 	{
 		sim.enabled[i] = true;
@@ -151,22 +156,26 @@ void complain(const Json::Value &json, const std::string &expected)
 
 void parse(bool &b, const Json::Value &json)
 {
-	if (!json.isBool()) complain(json, "boolean");
+	if (!json.isBool())
+		complain(json, "boolean");
 	b = json.asBool();
 }
 void parse(int &n, const Json::Value &json)
 {
-	if (!json.isIntegral()) complain(json, "integer");
+	if (!json.isIntegral())
+		complain(json, "integer");
 	n = json.asInt();
 }
 void parse(double &x, const Json::Value &json)
 {
-	if (!json.isNumeric()) complain(json, "real");
+	if (!json.isNumeric())
+		complain(json, "real");
 	x = json.asDouble();
 }
 void parse(std::string &s, const Json::Value &json)
 {
-	if (!json.isString()) complain(json, "std::string");
+	if (!json.isString())
+		complain(json, "std::string");
 	s = json.asString();
 }
 
@@ -210,11 +219,15 @@ void parse(Box &box, const Json::Value &json, const Box &box0)
 
 // Cloth
 
-void parse(Transformation&, const Json::Value&);
-void parse(Cloth::Material*&, const Json::Value&);
-void parse(Cloth::Remeshing&, const Json::Value&);
+void parse(Transformation &, const Json::Value &);
+void parse(Cloth::Material *&, const Json::Value &);
+void parse(Cloth::Remeshing &, const Json::Value &);
 
-struct Velocity { Vec3 v, w; Vec3 o; };
+struct Velocity
+{
+	Vec3 v, w;
+	Vec3 o;
+};
 void parse(Velocity &, const Json::Value &);
 void apply_velocity(Mesh &mesh, const Velocity &vel);
 
@@ -237,7 +250,7 @@ void parse(Cloth &cloth, const Json::Value &json)
 	parse(cloth.remeshing, json["remeshing"]);
 }
 
-void parse(Transformation& transform, const Json::Value &json)
+void parse(Transformation &transform, const Json::Value &json)
 {
 	Vec<4> rot(0);
 	parse(transform.translation, json["translate"], Vec3(0));
@@ -260,7 +273,7 @@ void apply_velocity(Mesh &mesh, const Velocity &vel)
 		mesh.nodes[n]->v = vel.v + cross(vel.w, mesh.nodes[n]->x - vel.o);
 }
 
-void load_material_data(Cloth::Material&, const std::string &filename);
+void load_material_data(Cloth::Material &, const std::string &filename);
 
 void parse(Cloth::Material *&material, const Json::Value &json)
 {
@@ -279,9 +292,9 @@ void parse(Cloth::Material *&material, const Json::Value &json)
 	bending_mult *= thicken;
 	material->density *= density_mult;
 	for (int i = 0; i < sizeof(material->stretching.s) / sizeof(Vec4); i++)
-		((Vec4*)&material->stretching.s)[i] *= stretching_mult;
+		((Vec4 *)&material->stretching.s)[i] *= stretching_mult;
 	for (int i = 0; i < sizeof(material->bending.d) / sizeof(double); i++)
-		((double*)&material->bending.d)[i] *= bending_mult;
+		((double *)&material->bending.d)[i] *= bending_mult;
 	parse(material->damping, json["damping"], 0.);
 	parse(Range(material->strain_min, material->strain_max),
 		  json["strain_limits"], Vec2(-infinity, infinity));
@@ -301,7 +314,7 @@ void parse(Cloth::Remeshing &remeshing, const Json::Value &json)
 
 // Other things
 
-void parse(Motion&, const Json::Value&);
+void parse(Motion &, const Json::Value &);
 
 void parse_motions(vector<Motion> &motions, const Json::Value &json)
 {
@@ -324,10 +337,19 @@ void parse_motions(vector<Motion> &motions, const Json::Value &json)
 		}
 	}
 	else
+	{
+		std::cout << "begin to parse, json = \n"
+				  << json << std::endl;
+		if (json.isNull() == true)
+		{
+			std::cout << "motion is empty, do not parse\n";
+			return;
+		}
 		parse(motions, json);
+	}
 }
 
-void parse(Motion::Point&, const Json::Value&);
+void parse(Motion::Point &, const Json::Value &);
 
 void parse(Motion &motion, const Json::Value &json)
 {
@@ -356,29 +378,33 @@ void parse(Motion::Point &mp, const Json::Value &json)
 	}
 }
 
-void parse_handle(vector<Handle*> &, const Json::Value &,
+void parse_handle(vector<Handle *> &, const Json::Value &,
 				  const vector<Cloth> &, const vector<Motion> &);
 
-void parse_handles(vector<Handle*> &hans, const Json::Value &jsons,
+void parse_handles(vector<Handle *> &hans, const Json::Value &jsons,
 				   const vector<Cloth> &cloths, const vector<Motion> &motions)
 {
+	if(jsons.isNull())
+	{
+		std::cout <<"handles is null, return\n";
+	}
 	for (int j = 0; j < jsons.size(); j++)
 		parse_handle(hans, jsons[j], cloths, motions);
 }
 
-void parse_node_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_node_handle(vector<Handle *> &hans, const Json::Value &json,
 					   const vector<Cloth> &cloths,
 					   const vector<Motion> &motions);
 
-void parse_circle_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_circle_handle(vector<Handle *> &hans, const Json::Value &json,
 						 const vector<Cloth> &cloths,
 						 const vector<Motion> &motions);
 
-void parse_glue_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_glue_handle(vector<Handle *> &hans, const Json::Value &json,
 					   const vector<Cloth> &cloths,
 					   const vector<Motion> &motions);
 
-void parse_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_handle(vector<Handle *> &hans, const Json::Value &json,
 				  const vector<Cloth> &cloths, const vector<Motion> &motions)
 {
 	std::string type;
@@ -407,7 +433,7 @@ void parse_handle(vector<Handle*> &hans, const Json::Value &json,
 	}
 }
 
-void parse_node_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_node_handle(vector<Handle *> &hans, const Json::Value &json,
 					   const vector<Cloth> &cloths,
 					   const vector<Motion> &motions)
 {
@@ -446,14 +472,14 @@ void parse_node_handle(vector<Handle*> &hans, const Json::Value &json,
 	}
 }
 
-void parse_circle_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_circle_handle(vector<Handle *> &hans, const Json::Value &json,
 						 const vector<Cloth> &cloths,
 						 const vector<Motion> &motions)
 {
 	CircleHandle *han = new CircleHandle;
 	int c, m;
 	parse(c, json["cloth"], 0);
-	han->mesh = (Mesh*)&cloths[c].mesh;
+	han->mesh = (Mesh *)&cloths[c].mesh;
 	parse(han->label, json["label"]);
 	parse(m, json["motion"], -1);
 	han->motion = (m != -1) ? &motions[m] : NULL;
@@ -465,7 +491,7 @@ void parse_circle_handle(vector<Handle*> &hans, const Json::Value &json,
 	hans.push_back(han);
 }
 
-void parse_glue_handle(vector<Handle*> &hans, const Json::Value &json,
+void parse_glue_handle(vector<Handle *> &hans, const Json::Value &json,
 					   const vector<Cloth> &cloths,
 					   const vector<Motion> &motions)
 {
@@ -480,12 +506,12 @@ void parse_glue_handle(vector<Handle*> &hans, const Json::Value &json,
 		abort();
 	}
 	const Mesh &mesh = cloths[c].mesh;
-	han->nodes[0] = (Node*)mesh.nodes[ns[0]];
-	han->nodes[1] = (Node*)mesh.nodes[ns[1]];
+	han->nodes[0] = (Node *)mesh.nodes[ns[0]];
+	han->nodes[1] = (Node *)mesh.nodes[ns[1]];
 	hans.push_back(han);
 }
 
-void parse_obstacle(Obstacle&, const Json::Value&, const vector<Motion>&);
+void parse_obstacle(Obstacle &, const Json::Value &, const vector<Motion> &);
 
 void parse_obstacles(vector<Obstacle> &obstacles, const Json::Value &json,
 					 const vector<Motion> &motions)
@@ -533,7 +559,7 @@ void parse_obstacle(Obstacle &obstacle, const Json::Value &json,
 	obstacle.get_mesh(0);
 }
 
-void parse_morph(Morph&, const Json::Value&, const vector<Cloth>&);
+void parse_morph(Morph &, const Json::Value &, const vector<Cloth> &);
 void parse(Spline<Morph::Weights>::Point &, const Json::Value &);
 
 void parse_morphs(vector<Morph> &morphs, const Json::Value &json,
@@ -549,7 +575,7 @@ void parse_morph(Morph &morph, const Json::Value &json,
 {
 	int c;
 	parse(c, json["cloth"], 0);
-	morph.mesh = (Mesh*)&cloths[c].mesh;
+	morph.mesh = (Mesh *)&cloths[c].mesh;
 	morph.targets.resize(json["targets"].size());
 	for (int j = 0; j < json["targets"].size(); j++)
 	{
@@ -563,12 +589,15 @@ void parse_morph(Morph &morph, const Json::Value &json,
 	for (int k = 0; k < nk; k++)
 	{
 		const Json::Value &j = json["spline"][k];
-		double t; parse(t, j["time"]);
+		double t;
+		parse(t, j["time"]);
 		morph.weights.points[k].t = morph.log_stiffness.points[k].t = t;
-		int m; parse(m, j["target"]);
+		int m;
+		parse(m, j["target"]);
 		morph.weights.points[k].x.assign(morph.targets.size(), 0);
 		morph.weights.points[k].x[m] = 1;
-		double s; parse(s, j["stiffness"]);
+		double s;
+		parse(s, j["stiffness"]);
 		morph.log_stiffness.points[k].x = log(s);
 	}
 	for (int k = 0; k < nk; k++)
@@ -593,7 +622,7 @@ void parse(Magic &magic, const Json::Value &json)
 	PARSE_MAGIC(collision_stiffness);
 	PARSE_MAGIC(repulsion_thickness);
 	parse(magic.projection_thickness, json["projection_thickness"],
-		  0.1*magic.repulsion_thickness);
+		  0.1 * magic.repulsion_thickness);
 	PARSE_MAGIC(edge_flip_threshold);
 	PARSE_MAGIC(rib_stiffening);
 	PARSE_MAGIC(combine_tensors);
@@ -603,8 +632,8 @@ void parse(Magic &magic, const Json::Value &json)
 
 // JSON materials
 
-void parse(StretchingSamples&, const Json::Value&);
-void parse(BendingData&, const Json::Value&);
+void parse(StretchingSamples &, const Json::Value &);
+void parse(BendingData &, const Json::Value &);
 
 void load_material_data(Cloth::Material &material, const std::string &filename)
 {
