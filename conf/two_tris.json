@@ -1,0 +1,28 @@
+// Square sheet of cloth interacting with moving sphere
+// Narain et al. 2012, Figure 2(b)
+{
+    "frame_time": 0.04,
+    "frame_steps": 4,
+    "end_time": 1000,
+    "cloths": [{
+        "mesh": "meshes/xudong_two_tris.obj",
+        "transform": {"scale":1,"translate": [0, 0, 0]},
+        "materials": [{"data": "materials/camel-ponte-roma.json",
+                       "thicken": 2}],
+        "remeshing": {
+            "refine_angle": 0.3,
+            "refine_compression": 0.1,
+            "refine_velocity": 1,
+            "size": [1e-3, 10e-3],
+            "aspect_min": 0.5
+        }
+    }],
+    "obstacles": [],
+    "handles": [{"nodes": [0, 1, 2], "end_time": 100000}],
+    "gravity": [0, 0, -9.8],
+    "disable": [
+        "strainlimiting",
+        "remeshing"
+    ],
+    "magic": {"repulsion_thickness": 5e-3, "collision_stiffness": 1e6}
+}
