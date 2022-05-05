@@ -18,18 +18,18 @@ void ParseArg(int argc, char *argv[], std::string &config_path,
 void ParseConfig(std::string conf);
 int main(int argc, char *argv[])
 {
-	//	g_App.RunSimulate("Configurations\\flag.json");
-	//	g_App.RunSimulate("Configurations\\dress-blue.json");
-	// g_App.RunSimulate("Configurations\\dress-yellow.json");
-	// g_App.RunSimulate("Configurations\\xudong_drap.json");
+    //	g_App.RunSimulate("Configurations\\flag.json");
+    //	g_App.RunSimulate("Configurations\\dress-blue.json");
+    // g_App.RunSimulate("Configurations\\dress-yellow.json");
+    // g_App.RunSimulate("Configurations\\xudong_drap.json");
 
     // 1. initialize
-	bool disable_imgui = false;
-	std::string conf = "";
-	ParseArg(argc, argv, conf, disable_imgui);
+    bool disable_imgui = false;
+    std::string conf = "";
+    ParseArg(argc, argv, conf, disable_imgui);
 
     // 2. run simulation
-	g_App.RunSimulate(conf);
+    g_App.RunSimulate(conf);
 }
 
 void ParseArg(int argc, char *argv[], std::string &config_path,
@@ -65,9 +65,15 @@ void ParseArg(int argc, char *argv[], std::string &config_path,
         std::cout << "[error] when parsing, " << e.what() << std::endl;
         exit(1);
     }
-    SIM_INFO("conf path {}, enable imgui {}", config_path, disable_imgui);
+    if (config_path.size() == 0)
+    {
+        SIM_ERROR("please offer config!");
+    }
+    else
+    {
+        SIM_INFO("conf path {}, enable imgui {}", config_path, disable_imgui);
+    }
 }
-
 
 void ParseConfig(std::string conf)
 {

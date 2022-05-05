@@ -338,8 +338,8 @@ void parse_motions(vector<Motion> &motions, const Json::Value &json)
 	}
 	else
 	{
-		std::cout << "begin to parse, json = \n"
-				  << json << std::endl;
+		// std::cout << "begin to parse, json = \n"
+		// 		  << json << std::endl;
 		if (json.isNull() == true)
 		{
 			std::cout << "motion is empty, do not parse\n";
