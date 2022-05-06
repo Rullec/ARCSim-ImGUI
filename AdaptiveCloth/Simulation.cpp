@@ -141,8 +141,23 @@ void Simulation::AdvanceStep()
 	}
 
 	this->DeleteConstraints(cons);
-}
 
+	UpdateImGUI();
+}
+#include "imgui.h"
+void Simulation::UpdateImGUI()
+{
+	// std::cout << "imgui is updated\n";
+    // ImGuiWindowFlags window_flags = 0;
+    // // window_flags |= ImGuiWindowFlags_NoMove;
+    // // window_flags |= ImGuiWindowFlags_NoResize;
+    // bool open = false;
+    // bool *p_open = &open;
+    // ImGui::Begin("ARCSim", p_open, window_flags);
+	// ImGui::Text("Hello, world %d", 123);
+    // ImGui::End();
+	// ImGui::NewFrame();
+}
 
 vector<Constraint*> Simulation::GetConstraints(bool include_proximity)
 {

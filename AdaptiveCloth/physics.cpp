@@ -164,13 +164,13 @@ pair<Mat12x12, Vec12> bending_force(const Edge *edge)
 	const Face *face0 = edge->adjf[0], *face1 = edge->adjf[1];
 	if (!face0 || !face1)
 		return make_pair(Mat12x12(0), Vec12(0));
-	double theta = dihedral_angle<s>(edge);
-	double a = face0->a + face1->a;
+	double theta = dihedral_angle<s>(edge); // \theta \in [-\pi, \pi]; 
+	double a = face0->a + face1->a;	// area 
 	Vec3 x0 = pos<s>(edge->n[0]),
 		x1 = pos<s>(edge->n[1]),
 		x2 = pos<s>(edge_opp_vert(edge, 0)->node),
 		x3 = pos<s>(edge_opp_vert(edge, 1)->node);
-	double h0 = distance(x2, x0, x1), h1 = distance(x3, x0, x1);
+	double h0 = distance(x2, x0, x1), h1 = distance(x3, x0, x1);	// h0, h1
 	Vec3 n0 = nor<s>(face0), n1 = nor<s>(face1);
 	Vec2 w_f0 = barycentric_weights(x2, x0, x1),
 		w_f1 = barycentric_weights(x3, x0, x1);
@@ -186,6 +186,9 @@ pair<Mat12x12, Vec12> bending_force(const Edge *edge)
 		(*::materials)[face1->label]->weakening);
 	ke *= 1 / (1 + weakening * edge->damage);
 	double shape = sq(edge->l) / (2 * a);
+	
+	// hessian is dtheta * dtheta.T / 2
+	// force is theta * dtheta / 2
 	return make_pair(-ke * shape*outer(dtheta, dtheta) / 2.,
 					 -ke * shape*(theta - edge->theta_ideal)*dtheta / 2.);
 }
@@ -291,6 +294,7 @@ void add_internal_forces(const Cloth &cloth, SpMat<Mat3x3> &A,
 		else
 		{
 			double damping = (*::materials)[face->label]->damping;
+			// printf("[fint] stretch f %d damping %.3f\n", f, damping);
 			add_submat(-dt * (dt + damping)*J, indices(n0, n1, n2), A);
 			add_subvec(dt*(F + (dt + damping)*J*vs), indices(n0, n1, n2), b);
 		}
@@ -317,6 +321,7 @@ void add_internal_forces(const Cloth &cloth, SpMat<Mat3x3> &A,
 		{
 			double damping = ((*::materials)[edge->adjf[0]->label]->damping +
 				(*::materials)[edge->adjf[1]->label]->damping) / 2.;
+			// printf("[fint] bending e %d damping %.3f\n", e, damping);
 			add_submat(-dt * (dt + damping)*J, indices(n0, n1, n2, n3), A);
 			add_subvec(dt*(F + (dt + damping)*J*vs), indices(n0, n1, n2, n3), b);
 		}

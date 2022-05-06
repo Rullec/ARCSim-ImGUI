@@ -32,11 +32,20 @@
 
 typedef Vec<4> Vec4;
 
-struct StretchingData { Vec4 d[2][5]; };
+struct StretchingData
+{
+  Vec4 d[2][5];
+};
 
-struct StretchingSamples { Vec4 s[40][40][40]; };
+struct StretchingSamples
+{
+  Vec4 s[40][40][40];
+};
 
-struct BendingData { double d[3][5]; };
+struct BendingData
+{
+  double d[3][5];
+};
 
 Vec4 stretching_stiffness(const Mat2x2 &G, const StretchingSamples &samples);
 
@@ -44,4 +53,15 @@ void evaluate_stretching_samples(StretchingSamples &samples, const StretchingDat
 
 double bending_stiffness(const Edge *edge, int side, const BendingData &data, double initial_angle = 0);
 
+enum eBendingMode
+{
+  DDE_BENDING_MODE = 0,
+  LINEAR_BENDING_MODE,
+  NONLINEAR_BENDING_MODE,
+  NUM_OF_BENDING_MODE
+};
+eBendingMode BuildBendingModeFromStr(std::string str);
+std::string BuildBendingModeStr(eBendingMode mode);
+Vec4 GetLinearBendingModulus();
+void SetLinearBendingModulus(const Vec4 &val);
 #endif

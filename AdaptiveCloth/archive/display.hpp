@@ -32,8 +32,7 @@
 extern Simulation sim;
 extern int frame;
 
-// extern int subwindows[3];
-extern int gWorldWindow;
+extern int subwindows[3];
 
 struct GlutCallbacks
 {

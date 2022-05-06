@@ -70,6 +70,9 @@ private:
 	void DeleteConstraints(const std::vector<Constraint*> & cons);
 	void StrainlimitingStep(const std::vector<Constraint*> & cons);
 	std::vector<Constraint*> GetConstraints(bool include_proximity);
+	
+	void InitImGUI();
+	void UpdateImGUI();
 };
 
 // Helper functions
