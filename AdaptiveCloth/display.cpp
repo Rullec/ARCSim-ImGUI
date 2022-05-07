@@ -14,7 +14,7 @@
 #include "imgui/backends/imgui_impl_glut.h"
 #include "imgui/backends/imgui_impl_opengl2.h"
 
-static std::vector<Mesh *> &meshes = g_App.m_Sim.m_pClothMeshes;
+static std::vector<Mesh *> &meshes = g_App.m_Sim->m_pClothMeshes;
 void vertex(const Vec2 &x)
 {
     glVertex2d(x[0], x[1]);
@@ -153,6 +153,23 @@ void draw_mesh(const Mesh &mesh, bool set_color = false)
         glEnable(GL_COLOR_MATERIAL);
 }
 
+void draw_axes()
+{
+    glBegin(GL_LINES);
+    for (int i = 0; i < 3; i++)
+    {
+        // 1. set color
+        Vec3 line_color(0, 0, 0);
+        line_color[i] = 1.0;
+        color(line_color);
+
+        // 2. set line
+        vertex(Vec3(0, 0, 0));
+        vertex(line_color);
+    }
+    glEnd();
+}
+
 template <Space s>
 void draw_meshes(bool set_color = false)
 {
@@ -207,20 +224,42 @@ void glut_display_func()
     ambient_light(Vec3(0.5));
     // apply_view(views[WorldPane]);
     apply_view(gMainView);
+    draw_axes();
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     draw_meshes<WS>(true);
+    
     glEnable(GL_CULL_FACE);
     glColor3f(0.8, 0.8, 0.8);
-    for (int o = 0; o < g_App.m_Sim.m_Obstacles.size(); o++)
-        draw_mesh<WS>(g_App.m_Sim.m_Obstacles[o].get_mesh());
+    for (int o = 0; o < g_App.m_Sim->m_Obstacles.size(); o++)
+        draw_mesh<WS>(g_App.m_Sim->m_Obstacles[o].get_mesh());
     glDisable(GL_CULL_FACE);
     glColor4d(0, 0, 0, 0.2);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     draw_meshes<WS>();
     draw_seam_or_boundary_edges<WS>();
-
+    
     // my_display_code();
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
+
+    {
+        ImVec2 init_window_size = ImVec2(400, 600);
+        ImGui::SetNextWindowSize(init_window_size, ImGuiCond_FirstUseEver);
+
+        ImGui::SetNextWindowPos(ImVec2(1280 - init_window_size.x, 0),
+                                ImGuiCond_FirstUseEver);
+
+        ImGuiWindowFlags window_flags = 0;
+        // window_flags |= ImGuiWindowFlags_NoMove;
+        // window_flags |= ImGuiWindowFlags_NoResize;
+        bool open = false;
+        bool *p_open = &open;
+        ImGui::Begin("ARCSim", p_open, window_flags);
+
+        g_App.m_Sim->UpdateImGUI();
+
+        ImGui::End();
+    }
 
     // Rendering
     ImGui::Render();
@@ -245,6 +284,7 @@ struct MouseState
     } func;
 } mouse_state;
 
+bool gImGUICaptureMouseLastTime = false;
 void mouse(int button, int state, int x, int y)
 {
     // printf("[mouse] x %d y %d\n", x, y);
@@ -252,7 +292,12 @@ void mouse(int button, int state, int x, int y)
     ImGuiIO &io = ImGui::GetIO();
     if (io.WantCaptureMouse)
     {
+        gImGUICaptureMouseLastTime = true;
         return;
+    }
+    else
+    {
+        gImGUICaptureMouseLastTime = false;
     }
     mouse_state.down = (state == GLUT_DOWN);
     mouse_state.x = x;
@@ -313,20 +358,24 @@ void motion(int x, int y)
     // 	ECHO("i don't know what to do with this event");
     // 	return;
     // }
-    View &view = gMainView;
-    if (mouse_state.func == MouseState::ROTATE)
+    if (gImGUICaptureMouseLastTime == false)
     {
-        double speed = 0.25;
-        view.lon += (x - mouse_state.x) * speed;
-        view.lat += (y - mouse_state.y) * speed;
-        view.lat = clamp(view.lat, -90., 90.);
+        View &view = gMainView;
+        if (mouse_state.func == MouseState::ROTATE)
+        {
+            double speed = 0.25;
+            view.lon += (x - mouse_state.x) * speed;
+            view.lat += (y - mouse_state.y) * speed;
+            view.lat = clamp(view.lat, -90., 90.);
+        }
+        else if (mouse_state.func == MouseState::TRANSLATE)
+        {
+            double speed = 1e-3;
+            view.offset[0] += (x - mouse_state.x) * speed;
+            view.offset[1] -= (y - mouse_state.y) * speed;
+        }
     }
-    else if (mouse_state.func == MouseState::TRANSLATE)
-    {
-        double speed = 1e-3;
-        view.offset[0] += (x - mouse_state.x) * speed;
-        view.offset[1] -= (y - mouse_state.y) * speed;
-    }
+    gImGUICaptureMouseLastTime = false;
     mouse_state.x = x;
     mouse_state.y = y;
     glutPostRedisplay();
@@ -360,7 +409,7 @@ void run_glut(const GlutCallbacks &cb)
     //         glutMouseFunc(mouse);
     //         glutMotionFunc(motion);
     //     }
-    //     ::pane_enabled[PlasticPane] = g_App.m_Sim.enabled[Simulation::Plasticity];
+    //     ::pane_enabled[PlasticPane] = g_App.m_Sim->enabled[Simulation::Plasticity];
 
     //     InitImGUI();
     //     glutMainLoop();
@@ -412,8 +461,5 @@ void run_glut(const GlutCallbacks &cb)
 
 void redisplay()
 {
-
-    // glutSetWindow(subwindows[i]);
     glutPostRedisplay();
-    // }
 }

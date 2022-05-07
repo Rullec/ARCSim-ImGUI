@@ -6,22 +6,27 @@
 #include "display.hpp"
 #include "Application.h"
 #include "separateobs.hpp"
-
+#include "StripSimulation.hpp"
+#include "StripSynthesis.hpp"
 using namespace ARCSim;
 
-Application		g_App;
+Application g_App;
 
 extern void zoom(bool in);
-extern "C" { FILE __iob_func[3] = { *stdin, *stdout, *stderr }; }
+extern "C"
+{
+	FILE __iob_func[3] = {*stdin, *stdout, *stderr};
+}
 
 /*************************************************************************
 ***************************    Application    ****************************
 *************************************************************************/
 Application::Application() : m_IsRunning(false)
 {
-
+	// m_Sim = new StripSimulation();
+	m_Sim = new Simulation();
+	// m_Sim = new StripSynthesis();
 }
-
 
 void init_physics(const std::string &json_file)
 {
@@ -29,19 +34,17 @@ void init_physics(const std::string &json_file)
 	load_json(json_file, g_App.m_Sim);
 	// std::cout << "end to load json\n";
 
-	g_App.m_Sim.Prepare();
-	
-	separate_obstacles(g_App.m_Sim.m_pObstacleMeshes, g_App.m_Sim.m_pClothMeshes);
+	g_App.m_Sim->Prepare();
 
-	g_App.m_Sim.RelaxInitialState();
+	// separate_obstacles(g_App.m_Sim->m_pObstacleMeshes, g_App.m_Sim->m_pClothMeshes);
+
+	// g_App.m_Sim->RelaxInitialState();
 }
-
 
 void sim_step()
 {
-	g_App.m_Sim.AdvanceStep();
+	g_App.m_Sim->AdvanceStep();
 }
-
 
 void idle()
 {
@@ -51,7 +54,6 @@ void idle()
 	sim_step();
 	redisplay();
 }
-
 
 static void keyboard(unsigned char key, int x, int y)
 {
@@ -81,7 +83,6 @@ static void keyboard(unsigned char key, int x, int y)
 	}
 }
 
-
 void Application::RunSimulate(std::string jsonPath)
 {
 	init_physics(jsonPath);
@@ -93,8 +94,6 @@ void Application::RunSimulate(std::string jsonPath)
 	run_glut(cb);
 }
 
-
 Application::~Application()
 {
-
 }

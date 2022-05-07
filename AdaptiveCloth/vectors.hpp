@@ -99,6 +99,7 @@ public:
 	explicit Vec(T x, T y) { static_assert(n == 2); c[0] = x; c[1] = y; }
 	explicit Vec(T x, T y, T z) { static_assert(n == 3); c[0] = x; c[1] = y; c[2] = z; }
 	explicit Vec(T x, T y, T z, T w) { static_assert(n == 4); c[0] = x; c[1] = y; c[2] = z; c[3] = w; }
+	explicit Vec(T x, T y, T z, T a, T b, T e) { static_assert(n == 6); c[0] = x; c[1] = y; c[2] = z; c[3] = a; c[4] = b; c[5] = e; }
 	T &operator[] (int i) { return c[i]; }
 	const T &operator[] (int i) const { return c[i]; }
 };

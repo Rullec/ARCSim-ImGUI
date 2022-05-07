@@ -31,6 +31,8 @@
 #include "util.hpp"
 
 typedef Vec<4> Vec4;
+typedef Vec<3, float> Vec3f;
+typedef Vec<6, float> Vec6f;
 
 struct StretchingData
 {
@@ -56,12 +58,15 @@ double bending_stiffness(const Edge *edge, int side, const BendingData &data, do
 enum eBendingMode
 {
   DDE_BENDING_MODE = 0,
-  LINEAR_BENDING_MODE,
+  LINEAR_ISOMETRIC_BENDING_MODE,
+  LINEAR_ANISO_BENDING_MODE,
   NONLINEAR_BENDING_MODE,
   NUM_OF_BENDING_MODE
 };
 eBendingMode BuildBendingModeFromStr(std::string str);
 std::string BuildBendingModeStr(eBendingMode mode);
-Vec4 GetLinearBendingModulus();
-void SetLinearBendingModulus(const Vec4 &val);
+Vec3f GetLinearBendingModulus();
+void SetLinearBendingModulus(const Vec3f &val);
+Vec6f GetNonlinearBendingModulus();
+void SetNonlinearBendingModulus(const Vec6f &val);
 #endif

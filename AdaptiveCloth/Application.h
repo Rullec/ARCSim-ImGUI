@@ -29,7 +29,7 @@ namespace ARCSim
 
 	public:
 
-		Simulation				m_Sim;
+		Simulation				*m_Sim;
 		volatile bool			m_IsRunning;
 	};
 }

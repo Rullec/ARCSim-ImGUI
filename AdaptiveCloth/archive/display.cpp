@@ -41,7 +41,7 @@
 #include "imgui/backends/imgui_impl_glut.h"
 using namespace std;
 
-static vector<Mesh *> &meshes = g_App.m_Sim.m_pClothMeshes;
+static vector<Mesh *> &meshes = g_App.m_Sim->m_pClothMeshes;
 
 string obj2png_filename;
 
@@ -124,8 +124,8 @@ Vec3 area_color(const Face *face)
 	double l0 = norm(u1 - u2), l1 = norm(u2 - u0), l2 = norm(u0 - u1);
 	double l = max(l0, l1, l2);
 	double h = 2 * face->a / l * 2 / sqrt(3);
-	double lmin = ::g_App.m_Sim.m_Cloths[0].remeshing.size_min / 2,
-		   lmax = ::g_App.m_Sim.m_Cloths[0].remeshing.size_max / 4;
+	double lmin = ::g_App.m_Sim->m_Cloths[0].remeshing.size_min / 2,
+		   lmax = ::g_App.m_Sim->m_Cloths[0].remeshing.size_max / 4;
 	double a = clamp((log(l) - log(lmin)) / (log(lmax) - log(lmin)), 0., 1.),
 		   b = clamp((log(h) - log(lmin)) / (log(lmax) - log(lmin)), 0., 1.);
 	// inspired by http://www.sron.nl/~pault/colourschemes.pdf Fig. 3
@@ -340,9 +340,9 @@ void draw_node_vels()
 			vertex(node->x - dt * node->v);
 		}
 	}
-	for (int o = 0; o < g_App.m_Sim.m_Obstacles.size(); o++)
+	for (int o = 0; o < g_App.m_Sim->m_Obstacles.size(); o++)
 	{
-		const Mesh &mesh = g_App.m_Sim.m_Obstacles[o].get_mesh();
+		const Mesh &mesh = g_App.m_Sim->m_Obstacles[o].get_mesh();
 		for (int n = 0; n < mesh.nodes.size(); n++)
 		{
 			const Node *node = mesh.nodes[n];
@@ -540,8 +540,8 @@ void display_world()
 	draw_meshes<WS>(true);
 	glEnable(GL_CULL_FACE);
 	glColor3f(0.8, 0.8, 0.8);
-	for (int o = 0; o < g_App.m_Sim.m_Obstacles.size(); o++)
-		draw_mesh<WS>(g_App.m_Sim.m_Obstacles[o].get_mesh());
+	for (int o = 0; o < g_App.m_Sim->m_Obstacles.size(); o++)
+		draw_mesh<WS>(g_App.m_Sim->m_Obstacles[o].get_mesh());
 	glDisable(GL_CULL_FACE);
 	glColor4d(0, 0, 0, 0.2);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -733,7 +733,7 @@ void run_glut(const GlutCallbacks &cb)
 		glutMouseFunc(mouse);
 		glutMotionFunc(motion);
 	}
-	::pane_enabled[PlasticPane] = g_App.m_Sim.enabled[Simulation::Plasticity];
+	::pane_enabled[PlasticPane] = g_App.m_Sim->enabled[Simulation::Plasticity];
 
 	InitImGUI();
 	glutMainLoop();

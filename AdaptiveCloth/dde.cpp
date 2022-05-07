@@ -28,12 +28,18 @@
 #include "cloth.hpp"
 #include "util.hpp"
 #include "utils/LogUtil.h"
+#ifndef M_PI
+#define M_PI 3.1415926535
+#endif
 
 using namespace std;
-static Vec4 gLinearBendingModulus(0, 0, 0, 0);
+eBendingMode gCurBendingMode = eBendingMode::LINEAR_ANISO_BENDING_MODE;
+static Vec3f gLinearBendingModulus(2200, 2200, 2200);
+static Vec6f gNonlinearBendingModulus(0, 0, 0, 0, 0, 0);
 std::string gBendingModeStr[eBendingMode::NUM_OF_BENDING_MODE] = {
 	"dde",
-	"linear",
+	"linear_iso",
+	"linear_aniso",
 	"nonlinear"};
 
 eBendingMode BuildBendingModeFromStr(std::string str)
@@ -52,15 +58,23 @@ std::string BuildBendingModeStr(eBendingMode mode)
 	return gBendingModeStr[mode];
 }
 
-Vec4 GetLinearBendingModulus()
+Vec3f GetLinearBendingModulus()
 {
 	return gLinearBendingModulus;
 }
-void SetLinearBendingModulus(const Vec4 &val)
+void SetLinearBendingModulus(const Vec3f &val)
 {
 	gLinearBendingModulus = val;
 }
 
+Vec6f GetNonlinearBendingModulus()
+{
+	return gNonlinearBendingModulus;
+}
+void SetNonlinearBendingModulus(const Vec6f &val)
+{
+	gNonlinearBendingModulus = val;
+}
 static const int nsamples = 30;
 
 Vec4 evaluate_stretching_sample(const Mat2x2 &G, const StretchingData &data);
@@ -169,7 +183,7 @@ Vec4 stretching_stiffness(const Mat2x2 &G, const StretchingSamples &samples)
 	return stiffness;
 }
 
-double bending_stiffness(const Edge *edge, int side, const BendingData &data, double initial_angle)
+double bending_stiffness_dde(const Edge *edge, int side, const BendingData &data, double initial_angle)
 {
 	double curv = edge->theta * edge->l / (edge->adjf[0]->a + edge->adjf[1]->a);
 	double alpha = curv / 2;
@@ -201,4 +215,116 @@ double bending_stiffness(const Edge *edge, int side, const BendingData &data, do
 	if (actual_ke < 0)
 		actual_ke = 0;
 	return actual_ke;
+}
+double bending_stiffness_linear(const Edge *edge, int side, const BendingData &data, double initial_angle)
+{
+	return gLinearBendingModulus[0];
+}
+
+double bending_stiffness_nonlinear(const Edge *edge, int side, const BendingData &data, double initial_angle)
+{
+	return 0;
+}
+
+#include "vectors.hpp"
+
+/**
+ * \brief		calcualte edge bending stiffness by current angle
+ * */
+
+double bending_stiffness_linear_aniso(const Edge *edge, int side, const BendingData &data, double init_angle)
+{
+	// 1. calculate current angle , map the [0, pi / 2]
+	auto n0 = edge->n[0];
+	auto n1 = edge->n[1];
+	SIM_ASSERT(n0->verts.size() == 1);
+	SIM_ASSERT(n1->verts.size() == 1);
+	auto v0 = n0->verts[0];
+	auto v1 = n1->verts[0];
+	Vec2 uv_vec = v1->u - v0->u;
+	// std::cout << "edge vec = " << uv_vec << std::endl;
+	// find the normal vector of this edge
+	{
+		float u = uv_vec[0];
+		float v = uv_vec[1];
+		uv_vec[0] = -v;
+		uv_vec[1] = u;
+	}
+	uv_vec = normalize(uv_vec);
+	// std::cout << "edge normal = " << uv_vec << std::endl;
+
+	if (uv_vec[0] < 0)
+		uv_vec[0] *= -1;
+	if (uv_vec[1] < 0)
+		uv_vec[1] *= -1;
+
+	double theta = std::atan(uv_vec[1] / std::max(uv_vec[0], 1e-5));
+	// std::cout << "edge normal theta = " << theta << std::endl;
+	SIM_ASSERT(theta >= 0);
+	SIM_ASSERT(theta <= M_PI / 2);
+
+	// 2. (theta angle) interpolate by warp, weft, diag direction
+	double weight0 = 0, weight1 = 0;
+	double bs0 = 0, bs1 = 0;
+	if (theta < M_PI / 4)
+	{
+		// [0, pi /4]
+		weight0 = (M_PI / 4 - theta) / (M_PI / 4);
+		weight1 = theta / (M_PI / 4);
+		// warp
+		bs0 = GetLinearBendingModulus()[0];
+		// diag
+		bs1 = GetLinearBendingModulus()[2];
+	}
+	else
+	{
+		// [pi/4, pi/2]
+		weight0 = (M_PI / 2 - theta) / (M_PI / 4);
+		weight1 = (theta - M_PI / 4) / (M_PI / 4);
+		// diag
+		bs0 = GetLinearBendingModulus()[2];
+		// weft
+		bs1 = GetLinearBendingModulus()[1];
+		// printf("theta between pi/4, pi/2, diag %.1e, weft %.1e\n", bs0, bs1);
+	}
+	double cur_bs = weight0 * bs0 + weight1 * bs1;
+
+	// 3. return
+	return cur_bs;
+}
+double bending_stiffness(const Edge *edge, int side, const BendingData &data, double initial_angle)
+{
+	double val = 0;
+	switch (gCurBendingMode)
+	{
+	case eBendingMode::DDE_BENDING_MODE:
+	{
+		val = bending_stiffness_dde(edge, side, data, initial_angle);
+		// printf("get dde val %.1e\n", val);
+		break;
+	}
+	case eBendingMode::LINEAR_ISOMETRIC_BENDING_MODE:
+	{
+		val = bending_stiffness_linear(edge, side, data, initial_angle);
+		// to SI
+		val *= 1e-9;
+		// printf("get linear val %.1e\n", val);
+		break;
+	}
+	case eBendingMode::LINEAR_ANISO_BENDING_MODE:
+	{
+		val = bending_stiffness_linear_aniso(edge, side, data, initial_angle);
+		val *= 1e-9;
+		break;
+	}
+	case eBendingMode::NONLINEAR_BENDING_MODE:
+	{
+		val = bending_stiffness_nonlinear(edge, side, data, initial_angle);
+		break;
+	}
+	default:
+		SIM_WARN("unrecognized bending mode {}", gCurBendingMode);
+		break;
+	}
+	return val;
 }

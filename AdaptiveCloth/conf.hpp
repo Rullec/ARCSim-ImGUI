@@ -30,4 +30,4 @@
 
 struct Simulation;
 
-void load_json(const std::string &filename, Simulation & sim);
+void load_json(const std::string &filename, Simulation * sim);

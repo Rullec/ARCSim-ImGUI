@@ -32,17 +32,19 @@
 
 using namespace std;
 
-template <typename T1, typename T2> void check(const T1 *p1, const T2 *p2,
-											   const vector<T2*> &v2)
+template <typename T1, typename T2>
+void check(const T1 *p1, const T2 *p2,
+		   const vector<T2 *> &v2)
 {
-	if (p2 && find((T2*)p2, v2) == -1)
+	if (p2 && find((T2 *)p2, v2) == -1)
 	{
 		cout << p1 << "'s adjacent " << p2 << " is not accounted for" << endl;
 		abort();
 	}
 }
 
-template <typename T1, typename T2> void not_null(const T1 *p1, const T2 *p2)
+template <typename T1, typename T2>
+void not_null(const T1 *p1, const T2 *p2)
 {
 	if (!p2)
 	{
@@ -51,26 +53,34 @@ template <typename T1, typename T2> void not_null(const T1 *p1, const T2 *p2)
 	}
 }
 
-template <typename T1, typename T2> void not_any_null(const T1 *p1, T2 *const*p2, int n)
+template <typename T1, typename T2>
+void not_any_null(const T1 *p1, T2 *const *p2, int n)
 {
 	bool any_null = false;
-	for (int i = 0; i < n; i++) if (!p2[i]) any_null = true;
+	for (int i = 0; i < n; i++)
+		if (!p2[i])
+			any_null = true;
 	if (any_null)
 	{
 		cout << "adjacent to " << p1 << " one of these is null" << endl;
-		for (int i = 0; i < n; i++) cout << p2[i] << endl;
+		for (int i = 0; i < n; i++)
+			cout << p2[i] << endl;
 		abort();
 	}
 }
 
-template <typename T1, typename T2> void not_all_null(const T1 *p1, T2 *const*p2, int n)
+template <typename T1, typename T2>
+void not_all_null(const T1 *p1, T2 *const *p2, int n)
 {
 	bool all_null = true;
-	for (int i = 0; i < n; i++) if (p2[i]) all_null = false;
+	for (int i = 0; i < n; i++)
+		if (p2[i])
+			all_null = false;
 	if (all_null)
 	{
 		cout << "adjacent to " << p1 << " all of these are null" << endl;
-		for (int i = 0; i < n; i++) cout << p2[i] << endl;
+		for (int i = 0; i < n; i++)
+			cout << p2[i] << endl;
 		abort();
 	}
 }
@@ -82,10 +92,10 @@ bool check_that_pointers_are_sane(const Mesh &mesh)
 		const Vert *vert = mesh.verts[v];
 		not_null(vert, vert->node);
 		check(vert, vert->node, mesh.nodes);
-		if (find((Vert*)vert, vert->node->verts) == -1)
+		if (find((Vert *)vert, vert->node->verts) == -1)
 		{
 			cout << "vert " << vert << "'s node " << vert->node
-				<< " doesn't contain it" << endl;
+				 << " doesn't contain it" << endl;
 			abort();
 		}
 		for (int i = 0; i < vert->adjf.size(); i++)
@@ -146,7 +156,7 @@ bool check_that_contents_are_sane(const Mesh &mesh)
 
 // Material space data
 
-void compute_ms_data(Face* face)
+void compute_ms_data(Face *face)
 {
 	face->Dm = Mat2x2(face->v[1]->u - face->v[0]->u,
 					  face->v[2]->u - face->v[0]->u);
@@ -156,7 +166,7 @@ void compute_ms_data(Face* face)
 		face->invDm = Mat2x2(0);
 }
 
-void compute_ms_data(Edge* edge)
+void compute_ms_data(Edge *edge)
 {
 	edge->l = 0;
 	for (int s = 0; s < 2; s++)
@@ -166,18 +176,18 @@ void compute_ms_data(Edge* edge)
 		edge->l /= 2;
 }
 
-void compute_ms_data(Vert* vert)
+void compute_ms_data(Vert *vert)
 {
 	vert->a = 0;
-	const vector<Face*> &adjfs = vert->adjf;
+	const vector<Face *> &adjfs = vert->adjf;
 	for (int i = 0; i < adjfs.size(); i++)
 	{
-		Face const* face = adjfs[i];
+		Face const *face = adjfs[i];
 		vert->a += face->a / 3;
 	}
 }
 
-void compute_ms_data(Node* node)
+void compute_ms_data(Node *node)
 {
 	node->a = 0;
 	for (int v = 0; v < node->verts.size(); v++)
@@ -200,11 +210,11 @@ void compute_ms_data(Mesh &mesh)
 
 // World-space data
 
-void compute_ws_data(Face* face)
+void compute_ws_data(Face *face)
 {
 	const Vec3 &x0 = face->v[0]->node->x,
-		&x1 = face->v[1]->node->x,
-		&x2 = face->v[2]->node->x;
+			   &x1 = face->v[1]->node->x,
+			   &x2 = face->v[2]->node->x;
 	face->n = normalize(cross(x1 - x0, x2 - x0));
 	// Mat3x2 F = derivative(x0, x1, x2, face);
 	// SVD<3,2> svd = singular_value_decomposition(F);
@@ -221,20 +231,20 @@ void compute_ws_data(Edge *edge)
 	edge->theta = dihedral_angle<WS>(edge);
 }
 
-void compute_ws_data(Node* node)
+void compute_ws_data(Node *node)
 {
 	node->n = Vec3(0);
 	for (int v = 0; v < node->verts.size(); v++)
 	{
 		const Vert *vert = node->verts[v];
-		const vector<Face*> &adjfs = vert->adjf;
+		const vector<Face *> &adjfs = vert->adjf;
 		for (int i = 0; i < adjfs.size(); i++)
 		{
-			Face const* face = adjfs[i];
+			Face const *face = adjfs[i];
 			int j = find(vert, face->v), j1 = (j + 1) % 3, j2 = (j + 2) % 3;
 			Vec3 e1 = face->v[j1]->node->x - node->x,
-				e2 = face->v[j2]->node->x - node->x;
-			node->n += cross(e1, e2) / (2 * norm2(e1)*norm2(e2));
+				 e2 = face->v[j2]->node->x - node->x;
+			node->n += cross(e1, e2) / (2 * norm2(e1) * norm2(e2));
 		}
 	}
 	node->n = normalize(node->n);
@@ -252,10 +262,14 @@ void compute_ws_data(Mesh &mesh)
 
 // Mesh operations
 
-template <> const vector<Vert*> &get(const Mesh &mesh) { return mesh.verts; }
-template <> const vector<Node*> &get(const Mesh &mesh) { return mesh.nodes; }
-template <> const vector<Edge*> &get(const Mesh &mesh) { return mesh.edges; }
-template <> const vector<Face*> &get(const Mesh &mesh) { return mesh.faces; }
+template <>
+const vector<Vert *> &get(const Mesh &mesh) { return mesh.verts; }
+template <>
+const vector<Node *> &get(const Mesh &mesh) { return mesh.nodes; }
+template <>
+const vector<Edge *> &get(const Mesh &mesh) { return mesh.edges; }
+template <>
+const vector<Face *> &get(const Mesh &mesh) { return mesh.faces; }
 
 Edge *get_edge(const Node *n0, const Node *n1)
 {
@@ -270,7 +284,7 @@ Edge *get_edge(const Node *n0, const Node *n1)
 
 Vert *edge_vert(const Edge *edge, int side, int i)
 {
-	Face *face = (Face*)edge->adjf[side];
+	Face *face = (Face *)edge->adjf[side];
 	if (!face)
 		return NULL;
 	for (int j = 0; j < 3; j++)
@@ -281,7 +295,7 @@ Vert *edge_vert(const Edge *edge, int side, int i)
 
 Vert *edge_opp_vert(const Edge *edge, int side)
 {
-	Face *face = (Face*)edge->adjf[side];
+	Face *face = (Face *)edge->adjf[side];
 	if (!face)
 		return NULL;
 	for (int j = 0; j < 3; j++)
@@ -304,12 +318,12 @@ void Mesh::add(Vert *vert)
 	vert->index = verts.size() - 1;
 }
 
-void Mesh::remove(Vert* vert)
+void Mesh::remove(Vert *vert)
 {
 	if (!vert->adjf.empty())
 	{
 		cout << "Error: can't delete vert " << vert << " as it still has "
-			<< vert->adjf.size() << " faces attached to it." << endl;
+			 << vert->adjf.size() << " faces attached to it." << endl;
 		return;
 	}
 	exclude(vert, verts);
@@ -325,12 +339,12 @@ void Mesh::add(Node *node)
 		node->verts[v]->node = node;
 }
 
-void Mesh::remove(Node* node)
+void Mesh::remove(Node *node)
 {
 	if (!node->adje.empty())
 	{
 		cout << "Error: can't delete node " << node << " as it still has "
-			<< node->adje.size() << " edges attached to it." << endl;
+			 << node->adje.size() << " edges attached to it." << endl;
 		return;
 	}
 	exclude(node, nodes);
@@ -350,7 +364,7 @@ void Mesh::remove(Edge *edge)
 	if (edge->adjf[0] || edge->adjf[1])
 	{
 		cout << "Error: can't delete edge " << edge
-			<< " as it still has a face attached to it." << endl;
+			 << " as it still has a face attached to it." << endl;
 		return;
 	}
 	exclude(edge, edges);
@@ -385,7 +399,7 @@ void Mesh::add(Face *face)
 	}
 }
 
-void Mesh::remove(Face* face)
+void Mesh::remove(Face *face)
 {
 	exclude(face, faces);
 	// adjacency
@@ -438,7 +452,7 @@ void apply_transformation_onto(const Mesh &start_state, Mesh &onto,
 	compute_ws_data(onto);
 }
 
-void apply_transformation(Mesh& mesh, const Transformation& tr)
+void apply_transformation(Mesh &mesh, const Transformation &tr)
 {
 	apply_transformation_onto(mesh, mesh, tr);
 }
@@ -503,4 +517,54 @@ void delete_mesh(Mesh &mesh)
 	mesh.nodes.clear();
 	mesh.edges.clear();
 	mesh.faces.clear();
+}
+
+void aabb_mesh(Vec3 &aabb_min, Vec3 &aabb_max, const Mesh &mesh)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		aabb_min[i] = 1e5;
+		aabb_max[i] = -1e5;
+	}
+
+	for (auto &v : mesh.verts)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			double curX = v->node->x[i];
+			if (curX < aabb_min[i])
+			{
+				aabb_min[i] = curX;
+			}
+			if (curX > aabb_max[i])
+			{
+				aabb_max[i] = curX;
+			}
+		}
+	}
+}
+
+void aabb2d_mesh(Vec2 &aabb_min, Vec2 &aabb_max, const Mesh &mesh)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		aabb_min[i] = 1e5;
+		aabb_max[i] = -1e5;
+	}
+
+	for (auto &v : mesh.verts)
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			double curX = v->u[i];
+			if (curX < aabb_min[i])
+			{
+				aabb_min[i] = curX;
+			}
+			if (curX > aabb_max[i])
+			{
+				aabb_max[i] = curX;
+			}
+		}
+	}
 }

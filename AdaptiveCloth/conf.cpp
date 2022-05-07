@@ -78,7 +78,7 @@ void parse_morphs(vector<Morph> &, const Json::Value &, const vector<Cloth> &);
 void parse(Wind &, const Json::Value &);
 void parse(Magic &, const Json::Value &);
 
-void load_json(const std::string &configFilename, Simulation &sim)
+void load_json(const std::string &configFilename, Simulation *sim)
 {
 	Json::Value json;
 	Json::Reader reader;
@@ -94,56 +94,56 @@ void load_json(const std::string &configFilename, Simulation &sim)
 	// Gather general data
 	if (!json["frame_time"].empty())
 	{
-		parse(sim.frame_time, json["frame_time"]);
-		parse(sim.frame_steps, json["frame_steps"], 1);
-		sim.step_time = sim.frame_time / sim.frame_steps;
-		parse(sim.end_time, json["end_time"], infinity);
-		parse(sim.end_frame, json["end_frame"], infinity);
+		parse(sim->frame_time, json["frame_time"]);
+		parse(sim->frame_steps, json["frame_steps"], 1);
+		sim->step_time = sim->frame_time / sim->frame_steps;
+		parse(sim->end_time, json["end_time"], infinity);
+		parse(sim->end_frame, json["end_frame"], infinity);
 	}
 	else if (!json["timestep"].empty())
 	{
-		parse(sim.step_time, json["timestep"]);
-		parse(sim.frame_steps, json["save_frames"], 1);
-		sim.frame_time = sim.step_time * sim.frame_steps;
-		parse(sim.end_time, json["duration"], infinity);
-		sim.end_frame = infinity;
+		parse(sim->step_time, json["timestep"]);
+		parse(sim->frame_steps, json["save_frames"], 1);
+		sim->frame_time = sim->step_time * sim->frame_steps;
+		parse(sim->end_time, json["duration"], infinity);
+		sim->end_frame = infinity;
 	}
-	sim.time = 0;
-	parse(sim.m_Cloths, json["cloths"]);
-	parse_motions(sim.m_Motions, json["motions"]);
-	parse_handles(sim.m_pHandles, json["handles"], sim.m_Cloths, sim.m_Motions);
-	parse_obstacles(sim.m_Obstacles, json["obstacles"], sim.m_Motions);
-	parse_morphs(sim.m_Morphs, json["morphs"], sim.m_Cloths);
-	parse(sim.gravity, json["gravity"], Vec3(0));
-	parse(sim.wind, json["wind"]);
-	parse(sim.friction, json["friction"], 0.6);
-	parse(sim.obs_friction, json["obs_friction"], 0.3);
+	sim->time = 0;
+	parse(sim->m_Cloths, json["cloths"]);
+	parse_motions(sim->m_Motions, json["motions"]);
+	parse_handles(sim->m_pHandles, json["handles"], sim->m_Cloths, sim->m_Motions);
+	parse_obstacles(sim->m_Obstacles, json["obstacles"], sim->m_Motions);
+	parse_morphs(sim->m_Morphs, json["morphs"], sim->m_Cloths);
+	parse(sim->gravity, json["gravity"], Vec3(0));
+	parse(sim->wind, json["wind"]);
+	parse(sim->friction, json["friction"], 0.6);
+	parse(sim->obs_friction, json["obs_friction"], 0.3);
 	std::string module_names[] = {"proximity", "physics", "strainlimiting",
 								  "collision", "remeshing", "separation",
 								  "popfilter", "plasticity"};
 	for (int i = 0; i < Simulation::nModules; i++)
 	{
-		sim.enabled[i] = true;
+		sim->enabled[i] = true;
 		for (int j = 0; j < json["disable"].size(); j++)
 			if (json["disable"][j] == module_names[i])
-				sim.enabled[i] = false;
+				sim->enabled[i] = false;
 	}
 	parse(::magic, json["magic"]);
 	// disable strain limiting and plasticity if not needed
 	bool has_strain_limits = false, has_plasticity = false;
-	for (int c = 0; c < sim.m_Cloths.size(); c++)
-		for (int m = 0; m < sim.m_Cloths[c].materials.size(); m++)
+	for (int c = 0; c < sim->m_Cloths.size(); c++)
+		for (int m = 0; m < sim->m_Cloths[c].materials.size(); m++)
 		{
-			Cloth::Material *mat = sim.m_Cloths[c].materials[m];
+			Cloth::Material *mat = sim->m_Cloths[c].materials[m];
 			if (std::isfinite(mat->strain_min) || std::isfinite(mat->strain_max))
 				has_strain_limits = true;
 			if (std::isfinite(mat->yield_curv))
 				has_plasticity = true;
 		}
 	if (!has_strain_limits)
-		sim.enabled[Simulation::StrainLimiting] = false;
+		sim->enabled[Simulation::StrainLimiting] = false;
 	if (!has_plasticity)
-		sim.enabled[Simulation::Plasticity] = false;
+		sim->enabled[Simulation::Plasticity] = false;
 }
 
 // Basic data types

@@ -6,7 +6,7 @@ include_directories(include)
 include_directories(include/imgui)
 include_directories(.)
 include_directories(./src)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4061 /wd4244 /wd4246 /wd4305 /wd4267 /wd4711 /wd4710 /wd4514 /wd4477 /wd4819 /wd4018")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4061 /wd4244 /wd4246 /wd4305 /wd4267 /wd4711 /wd4710 /wd4514 /wd4477 /wd4819 /wd4018 /MP")
 
 set(CMAKE_CXX_STANDARD 17)
 include_directories(Third-Party/include)

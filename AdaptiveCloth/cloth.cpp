@@ -28,23 +28,35 @@
 
 void Cloth::ComputeMasses()
 {
-	for (int v = 0; v < mesh.verts.size(); v++)
-		mesh.verts[v]->m = 0.0f;
+  for (int v = 0; v < mesh.verts.size(); v++)
+    mesh.verts[v]->m = 0.0f;
 
-	for (int n = 0; n < mesh.nodes.size(); n++)
-		mesh.nodes[n]->m = 0.0f;
+  for (int n = 0; n < mesh.nodes.size(); n++)
+    mesh.nodes[n]->m = 0.0f;
 
-	for (int f = 0; f < mesh.faces.size(); f++)
-	{
-		Face * pFace = mesh.faces[f];
+  for (int f = 0; f < mesh.faces.size(); f++)
+  {
+    Face *pFace = mesh.faces[f];
 
-		pFace->m = pFace->a * materials[pFace->label]->density;
+    pFace->m = pFace->a * materials[pFace->label]->density;
 
-		for (int v = 0; v < 3; v++)
-		{
-			pFace->v[v]->m += pFace->m / 3.0f;
+    for (int v = 0; v < 3; v++)
+    {
+      pFace->v[v]->m += pFace->m / 3.0f;
 
-			pFace->v[v]->node->m += pFace->m / 3.0f;
-		}
-	}
+      pFace->v[v]->node->m += pFace->m / 3.0f;
+    }
+  }
+}
+
+void Cloth::SetDensity(int material_idx, float newDensity)
+{
+  float oldVal = materials[material_idx]->density;
+  if (std::fabs(oldVal - newDensity) < 1e-6)
+    return;
+  else
+  {
+    materials[material_idx]->density = newDensity;
+    this->ComputeMasses();
+  }
 }
