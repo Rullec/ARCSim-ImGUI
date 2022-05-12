@@ -23,8 +23,8 @@ extern "C"
 *************************************************************************/
 Application::Application() : m_IsRunning(false)
 {
-	// m_Sim = new StripSimulation();
-	m_Sim = new Simulation();
+	m_Sim = new StripSimulation();
+	// m_Sim = new Simulation();
 	// m_Sim = new StripSynthesis();
 }
 

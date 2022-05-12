@@ -240,8 +240,8 @@ pair<Mat12x12, Vec12> bending_force_qbending(const Edge *edge)
 				K(j, 3 * i + j) = coef[i];
 		}
 		double a = face0->a + face1->a; // area
-		double shape_factor = 3.0 / a;
-
+		double shape_factor = 6.0 / a;
+		// shape_factor /= 3;
 		// 3. calculate hessian
 		// 4. calculate force
 		hessian = shape_factor * transpose(K) * K;
