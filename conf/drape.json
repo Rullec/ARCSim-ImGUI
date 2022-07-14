@@ -6,7 +6,7 @@
     "end_time": 1000,
     "cloths": [
         {
-            "mesh": "meshes/wanxiangtanniuzai.obj",
+            "mesh": "meshes/xudong_huaxiancubu_new.obj",
             "transform": {
                 "scale": 1,
                 "translate": [
@@ -56,7 +56,7 @@
         "remeshing"
     ],
     "magic": {
-        "repulsion_thickness": 5e-3,
+        "repulsion_thickness": 3e-3,
         "collision_stiffness": 1e6
     }
 }

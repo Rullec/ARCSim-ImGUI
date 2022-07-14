@@ -56,13 +56,15 @@ struct Simulation
 	std::vector<Constraint *> m_pConstraits;
 	std::vector<Mesh *> m_pClothMeshes;
 	std::vector<Mesh *> m_pObstacleMeshes;
-
+	std::vector<std::vector<Vec3>> m_cloth_initpos;
 public:
 	virtual void Prepare();
 	virtual void AdvanceStep();
 	void RelaxInitialState();
 	virtual void UpdateImGUI();
-
+	virtual void Reset();
+protected:
+	void ClothResetInitPos();
 private:
 	void StepMesh();
 	void CollisionStep();

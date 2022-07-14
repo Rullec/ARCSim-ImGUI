@@ -223,9 +223,16 @@ if __name__ == "__main__":
     v0       |      v3
             v1
     '''
-    for _ in range(100):
+    for _ in range(1):
         v0, v1, v2, v3 = gen_pts()
         n0, n1, e = gen_edge(v0, v1, v2, v3)
+        print(f"v0 {v0}")
+        print(f"v1 {v1}")
+        print(f"v2 {v2}")
+        print(f"v3 {v3}")
+        # print(f"n0 {n0}")
+        # print(f"n1 {n1}")
+        # print(f"e {e}")
         # n0 *= 2
         # n1 *= 2
         # e *= 2
@@ -238,7 +245,7 @@ if __name__ == "__main__":
         #     print(f"deriv_ana n0 {deriv_ana}")
         #     print(f"deriv_num n0 {deriv_num}")
         #     assert np.linalg.norm(deriv_ana - deriv_num) < 1e-1
-
+        
         # # # 2. d \beta / d n1
         # if True:
         #     deriv_ana = D_dihedral_angle_n1(n0, n1, e)
@@ -246,7 +253,7 @@ if __name__ == "__main__":
         #     print(f"deriv_ana n1 {deriv_ana}")
         #     print(f"deriv_num n1 {deriv_num}")
         #     assert np.linalg.norm(deriv_ana - deriv_num) < 1e-1
-
+        # exit()
         # # 2. d \beta / d e
         # if True:
         #     deriv_ana = D_dihedral_angle_e(n0, n1, e)
@@ -256,14 +263,14 @@ if __name__ == "__main__":
         #     assert np.linalg.norm(deriv_ana - deriv_num) < 1e-1
 
         # 1. get the  d \theta / d x0 (vector)
-        '''
-        d theta / dx0 = 
-        '''
-        # dtheta_dv0_num = D_dihedral_dv0_num(v0, v1, v2, v3)
+        # '''
+        # d theta / dx0 = 
+        # '''
+        dtheta_dv0_num = D_dihedral_dv0_num(v0, v1, v2, v3)
         dtheta_dv0_ana = D_dihedral_dv0_ana(v0, v1, v2, v3)
-        print(f"dtheta_dv0_ana {dtheta_dv0_ana / np.linalg.norm(dtheta_dv0_ana)}")
+        print(f"dtheta_dv0_ana {dtheta_dv0_ana}")
         print(f"n0 {n0 / np.linalg.norm(n0)}")
-        # print(f"ana {dtheta_dv0_ana}")
-        # print(f"num {dtheta_dv0_num}")
+        print(f"ana {dtheta_dv0_ana}")
+        print(f"num {dtheta_dv0_num}")
         # 2. get the u1 vector (normal of triangle 0)
         # exit()

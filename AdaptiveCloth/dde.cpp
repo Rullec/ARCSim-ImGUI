@@ -258,7 +258,7 @@ double bending_stiffness_linear_aniso(const Edge *edge, int side, const BendingD
 	if (uv_vec[1] < 0)
 		uv_vec[1] *= -1;
 
-	double theta = std::atan(uv_vec[1] / std::max(uv_vec[0], 1e-5));
+	double theta = std::atan(uv_vec[1] / std::max(uv_vec[0], 1e-8));
 	// std::cout << "edge normal theta = " << theta << std::endl;
 	SIM_ASSERT(theta >= 0);
 	SIM_ASSERT(theta <= M_PI / 2);

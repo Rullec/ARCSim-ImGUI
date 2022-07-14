@@ -54,6 +54,16 @@ void Simulation::Prepare()
 
 		update_x0(*m_pObstacleMeshes[o]);
 	}
+
+	m_cloth_initpos.resize(this->m_pClothMeshes.size());
+	for (int i = 0; i < this->m_pClothMeshes.size(); i++)
+	{
+		m_cloth_initpos[i].clear();
+		for (auto &n : m_pClothMeshes[i]->verts)
+		{
+			m_cloth_initpos[i].push_back(n->node->x);
+		}
+	}
 }
 
 void Simulation::RelaxInitialState()
@@ -205,7 +215,7 @@ void Simulation::UpdateImGUI()
 		// 				   linear_bending[2]};
 		ImGui::DragFloat3("Linear Bending",
 						  &linear_bending[0],
-						  1e2, 0.0f, 1.0e7);
+						  50, 0.0f, 1.0e7);
 		SetLinearBendingModulus(linear_bending);
 	}
 	break;
@@ -234,7 +244,7 @@ void Simulation::UpdateImGUI()
 			for (int j = 0; j < this->m_Cloths[i].materials.size(); j++)
 			{
 				float curDensity = m_Cloths[i].materials[j]->density;
-				ImGui::DragFloat("cloth density", &curDensity, 0.01f, 0.01f, 0.6f);
+				ImGui::DragFloat("cloth density", &curDensity, 0.001f, 0.01f, 0.6f);
 				// if (curDensity - m_Cloths[i].materials[j]->density)
 				// {
 				m_Cloths[i].SetDensity(j, curDensity);
@@ -617,8 +627,11 @@ bool ExportObj(std::string export_path,
 	for (int i = 0; i < v_array.size(); i++)
 	{
 		auto v = v_array[i];
-		std::string cur_str = format_string("v %.5f %.5f %.5f\n", v->node->x[0],
-											v->node->x[1], v->node->x[2]);
+		double x = v->node->x[0];
+		double y = v->node->x[2];
+		double z = -v->node->x[1];
+
+		std::string cur_str = format_string("v %.5f %.5f %.5f\n", x, y, z);
 		fout << cur_str;
 	}
 	// if (enable_texutre_output == true)
@@ -666,4 +679,26 @@ bool ExportObj(std::string export_path,
 	// if (silent == false)
 	printf("[debug] export obj to %s\n", export_path.c_str());
 	return true;
+}
+
+void Simulation::ClothResetInitPos()
+{
+	for (int i = 0; i < this->m_pClothMeshes.size(); i++)
+	{
+		auto cur_cloth = m_pClothMeshes[i];
+		for (int n_id = 0; n_id < cur_cloth->verts.size(); n_id++)
+		{
+			// 1. clear velocity, clear x0
+			auto cur_v = cur_cloth->verts[n_id];
+			cur_v->node->v = Vec3(0, 0, 0);
+			cur_v->node->x = this->m_cloth_initpos[i][n_id];
+			cur_v->node->x0 = cur_v->node->x;
+		}
+	}
+}
+void Simulation::Reset()
+{
+	printf("begin to reset cloth!");
+	// 1. get cloth init pos
+	ClothResetInitPos();
 }

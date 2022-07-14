@@ -294,7 +294,7 @@ pair<Mat12x12, Vec12> bending_force_dihedral(const Edge *edge)
 	return make_pair(-ke * shape * outer(dtheta, dtheta) / 2.,
 					 -ke * shape * (theta - edge->theta_ideal) * dtheta / 2.);
 }
-bool gUseQBending = true;
+bool gUseQBending = false;
 
 template <Space s>
 pair<Mat12x12, Vec12> bending_force(const Edge *edge)

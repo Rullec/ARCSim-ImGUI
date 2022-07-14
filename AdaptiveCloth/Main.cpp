@@ -46,6 +46,7 @@ void ParseArg(int argc, char *argv[], std::string &config_path,
             cxxopts::value<bool>()->default_value("false"));
 
         options.parse_positional({"conf"});
+        
         auto result = options.parse(argc, argv);
 
         if (result.count("conf"))

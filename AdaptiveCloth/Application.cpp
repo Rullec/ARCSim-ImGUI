@@ -23,8 +23,8 @@ extern "C"
 *************************************************************************/
 Application::Application() : m_IsRunning(false)
 {
-	m_Sim = new StripSimulation();
-	// m_Sim = new Simulation();
+	// m_Sim = new StripSimulation();
+	m_Sim = new Simulation();
 	// m_Sim = new StripSynthesis();
 }
 
@@ -80,6 +80,10 @@ static void keyboard(unsigned char key, int x, int y)
 	else if (key == 'x')
 	{
 		zoom(false);
+	}
+	else if (key == 'r')
+	{
+		g_App.m_Sim->Reset();
 	}
 }
 

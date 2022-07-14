@@ -27,7 +27,7 @@ void StripSimulation::UpdateImGUI()
     // set free length
     {
         float new_tar = m_target_freelength;
-        ImGui::DragFloat("tar free length", &new_tar, 0.01, 0.01, 0.2);
+        ImGui::DragFloat("tar free length", &new_tar, 0.001, 0.01, 0.2);
         if (std::fabs(new_tar - m_target_freelength) > 1e-5)
         {
             m_target_freelength = new_tar;
@@ -123,35 +123,12 @@ void StripSimulation::Prepare()
     m_target_freelength = GetFreeLength();
 
     // set init pose
-    m_cloth_initpos.resize(this->m_pClothMeshes.size());
-    for (int i = 0; i < this->m_pClothMeshes.size(); i++)
-    {
-        m_cloth_initpos[i].clear();
-        for (auto &n : m_pClothMeshes[i]->verts)
-        {
-            m_cloth_initpos[i].push_back(n->node->x);
-        }
-    }
 
     m_target_freelength = 0.02;
     SetFreeLength(m_target_freelength);
 }
 
-void StripSimulation::ClothResetInitPos()
-{
-    for (int i = 0; i < this->m_pClothMeshes.size(); i++)
-    {
-        auto cur_cloth = m_pClothMeshes[i];
-        for (int n_id = 0; n_id < cur_cloth->verts.size(); n_id++)
-        {
-            // 1. clear velocity, clear x0
-            auto cur_v = cur_cloth->verts[n_id];
-            cur_v->node->v = Vec3(0, 0, 0);
-            cur_v->node->x = this->m_cloth_initpos[i][n_id];
-            cur_v->node->x0 = cur_v->node->x;
-        }
-    }
-}
+
 #include <set>
 double StripSimulation::CalculateHWRatio()
 {
